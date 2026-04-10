@@ -2,66 +2,20 @@ import tensorflow as tf
 import numpy as np
 import json
 import os
-import re
-from urllib.request import HTTPCookieProcessor, build_opener
+import gdown
 
 from config import AUTO_DOWNLOAD_MODEL, MODEL_PATH, CLASS_NAMES_PATH, MODEL_DOWNLOAD_URL
 
 
-def _save_response_content(response, destination):
-    with open(destination, "wb") as file_obj:
-        while True:
-            chunk = response.read(1024 * 1024)
-            if not chunk:
-                break
-            file_obj.write(chunk)
-
-
-def _extract_confirm_token(opener, html):
-    for cookie in opener.handlers[0].cookiejar:
-        if cookie.name.startswith("download_warning"):
-            return cookie.value
-
-    patterns = [
-        r'confirm=([0-9A-Za-z_]+)',
-        r'name="confirm"\s+value="([^"]+)"',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, html)
-        if match:
-            return match.group(1)
-    return None
-
-
 def _download_model_from_drive(download_url, destination):
-    opener = build_opener(HTTPCookieProcessor())
-
-    with opener.open(download_url) as response:
-        content_type = response.headers.get("Content-Type", "")
-        content_disposition = response.headers.get("Content-Disposition", "")
-
-        if "application/octet-stream" in content_type or "attachment" in content_disposition.lower():
-            _save_response_content(response, destination)
-            return
-
-        html = response.read().decode("utf-8", errors="ignore")
-
-    confirm_token = _extract_confirm_token(opener, html)
-    if not confirm_token:
-        raise RuntimeError("Could not resolve Google Drive download confirmation token.")
-
-    separator = "&" if "?" in download_url else "?"
-    confirmed_url = f"{download_url}{separator}confirm={confirm_token}"
-
-    with opener.open(confirmed_url) as response:
-        content_disposition = response.headers.get("Content-Disposition", "")
-        if "attachment" not in content_disposition.lower():
-            final_url = response.geturl()
-            if final_url != confirmed_url:
-                with opener.open(final_url) as redirected_response:
-                    _save_response_content(redirected_response, destination)
-                    return
-        _save_response_content(response, destination)
+    downloaded_path = gdown.download(
+        url=download_url,
+        output=destination,
+        quiet=False,
+        fuzzy=True,
+    )
+    if not downloaded_path or not os.path.exists(downloaded_path):
+        raise RuntimeError("Google Drive download did not produce a local file.")
 
 
 def ensure_model_available():
