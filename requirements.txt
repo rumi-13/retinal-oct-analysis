@@ -1,0 +1,6 @@
+flask
+flask-cors
+tensorflow
+numpy
+matplotlib
+werkzeug

@@ -13,4 +13,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.register_blueprint(predict_bp)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "0").lower() in {"1", "true", "yes"}
+    app.run(host="0.0.0.0", port=port, debug=debug)
