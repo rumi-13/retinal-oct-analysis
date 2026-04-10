@@ -154,27 +154,6 @@ Planned or recommended next improvements:
 - improve model evaluation reporting with metrics such as accuracy, precision, recall, and confusion matrix
 - compare Grad-CAM with stronger explainability methods for finer lesion localization
 - prepare the app for deployment with environment-based configuration
-
-## Render Deployment Note
-
-The model file is intentionally kept out of GitHub because it exceeds GitHub's file size limit. In deployment:
-
-- Render starts the backend
-- if the model file is not present on disk, the backend downloads it automatically from Google Drive
-- once downloaded, the backend loads it and serves predictions normally
-
-This lets the same codebase work both locally and in cloud deployment without requiring the large model file to live in the Git repository.
-
-Recommended Render settings:
-
-- Language: `Python 3`
-- Build Command: `pip install -r requirements.txt`
-- Start Command: `python app.py`
-- Environment Variable `MODEL_DOWNLOAD_URL`: `https://drive.google.com/uc?export=download&id=1jXrsLBiQHOnukSr1dg3CIeUXFshr05cF`
-- Environment Variable `AUTO_DOWNLOAD_MODEL`: `1`
-
-The backend is configured to bind to `0.0.0.0` and use Render's `PORT` variable automatically.
-
 ## Documentation
 
 Detailed Python module documentation is available here:
