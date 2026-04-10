@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Generated uploads and local output artifacts
+static/uploads/
+
+# Large local model artifact
+oct_retinal_model.keras
+
+# Local shortcuts and misc
+*.lnk

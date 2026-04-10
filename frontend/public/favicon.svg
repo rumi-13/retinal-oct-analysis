@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Retinal OCT Analysis</title>
+  <defs>
+    <linearGradient id="oct-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#164e63" />
+    </linearGradient>
+    <linearGradient id="oct-line" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#67e8f9" />
+      <stop offset="100%" stop-color="#a3e635" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#oct-bg)" />
+  <path
+    d="M12 39c4-8 8-12 13-12c4 0 6 3 10 3c5 0 7-8 17-8"
+    fill="none"
+    stroke="url(#oct-line)"
+    stroke-linecap="round"
+    stroke-width="5"
+  />
+  <path
+    d="M12 46c5-4 10-6 16-6c7 0 10 3 16 3c4 0 6-1 8-2"
+    fill="none"
+    stroke="#f8fafc"
+    stroke-linecap="round"
+    stroke-opacity="0.75"
+    stroke-width="3"
+  />
+  <circle cx="20" cy="20" r="6" fill="#34d399" fill-opacity="0.9" />
+</svg>
