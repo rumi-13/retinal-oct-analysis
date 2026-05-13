@@ -1,0 +1,6 @@
+gradio>=5.0.0
+tensorflow-cpu
+numpy
+matplotlib
+pillow
+gdown

@@ -5,11 +5,12 @@ export function UploadPanel({ file, loading, onFileChange, onSubmit }) {
         Prediction Workspace
       </p>
       <h1 className="mt-3 font-serif text-3xl font-semibold text-white sm:text-[2.4rem]">
-        Upload a retinal OCT image for analysis.
+        Upload a retinal OCT image for adaptive fused Grad-CAM analysis.
       </h1>
       <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">
-        This page keeps the original prediction logic intact and presents the result in a cleaner,
-        more focused clinical screening layout.
+        This page now uses an adaptive multi-layer fusion pipeline. Layer 2, layer 3, and layer 4
+        contributions are weighted per scan using confidence-retention validation instead of fixed
+        manual weights.
       </p>
 
       <form onSubmit={onSubmit} className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">

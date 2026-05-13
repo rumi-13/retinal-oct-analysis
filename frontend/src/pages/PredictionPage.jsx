@@ -28,7 +28,7 @@ export function PredictionPage() {
     formData.append("file", file)
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/predict", {
+      const response = await fetch("http://127.0.0.1:5000/analyze_fused", {
         method: "POST",
         body: formData,
       })

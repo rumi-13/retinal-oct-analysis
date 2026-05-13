@@ -2,12 +2,13 @@ import tensorflow as tf
 import numpy as np
 import json
 import os
-import gdown
 
 from config import AUTO_DOWNLOAD_MODEL, MODEL_PATH, CLASS_NAMES_PATH, MODEL_DOWNLOAD_URL
 
 
 def _download_model_from_drive(download_url, destination):
+    import gdown
+
     downloaded_path = gdown.download(
         url=download_url,
         output=destination,
