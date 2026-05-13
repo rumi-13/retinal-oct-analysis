@@ -133,15 +133,15 @@ http://127.0.0.1:5173
 - trained retinal OCT classifier integrated into a web app
 - local-first model loading with cloud download fallback
 - confidence level shown in the prediction UI
-- Grad-CAM explanation output included with the result
+- **Adaptive Multi-Layer Fused Grad-CAM** strategy for precise localization
+- per-scan confidence retention validation and weighting
 - cleaned frontend branding and navigation
-- per-file Python documentation available in `docs/python-files`
 
 ## Limitations
 
 - the model is intended for retinal OCT scans only
 - non-OCT images may still produce a label, but that result is not meaningful
-- Grad-CAM provides useful visual explanation, but heatmaps can still be coarse
+- Grad-CAM provides useful visual explanation, but standard single-layer heatmaps can be coarse; our adaptive fusion mitigates this.
 
 ## What's Next
 
@@ -152,13 +152,14 @@ Planned or recommended next improvements:
 - add backend requirements and setup instructions in a dedicated environment guide
 - add frontend and backend automated tests
 - improve model evaluation reporting with metrics such as accuracy, precision, recall, and confusion matrix
-- compare Grad-CAM with stronger explainability methods for finer lesion localization
 - prepare the app for deployment with environment-based configuration
+
 ## Documentation
 
-Detailed Python module documentation is available here:
+Detailed research-oriented documentation is available here:
 
-- `docs/python-files/README.md`
+- [Adaptive Fused Grad-CAM Overview](ADAPTIVE_FUSED_GRADCAM_DOC.md)
+- [In-Depth Strategy Explainer](IN_DEPTH_ADAPTIVE_GRADCAM_EXPLAINER.md)
 
 ## Important Note
 
