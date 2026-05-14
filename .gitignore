@@ -35,6 +35,7 @@ frontend/dist/
 
 # Generated uploads and local output artifacts
 static/uploads/
+output/
 
 # Large local model artifact
 oct_retinal_model.keras

@@ -158,8 +158,9 @@ Planned or recommended next improvements:
 
 Detailed research-oriented documentation is available here:
 
-- [Adaptive Fused Grad-CAM Overview](ADAPTIVE_FUSED_GRADCAM_DOC.md)
-- [In-Depth Strategy Explainer](IN_DEPTH_ADAPTIVE_GRADCAM_EXPLAINER.md)
+- [Adaptive Fused Grad-CAM Overview](docs/ADAPTIVE_FUSED_GRADCAM_DOC.md)
+- [In-Depth Strategy Explainer](docs/IN_DEPTH_ADAPTIVE_GRADCAM_EXPLAINER.md)
+- [Simple Explainer](docs/SIMPLE_EXPLAINER.md)
 
 ## Important Note
 

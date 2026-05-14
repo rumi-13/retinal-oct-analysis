@@ -50,12 +50,6 @@ export function ResultPanel({ result, loading, error }) {
       alt: "Fused heatmap",
     },
     {
-      key: "binary_mask_url",
-      title: "Binary Mask",
-      url: result?.binary_mask_url,
-      alt: "Binary mask",
-    },
-    {
       key: "masked_oct_url",
       title: "Masked OCT",
       url: result?.masked_oct_url,
@@ -161,6 +155,26 @@ export function ResultPanel({ result, loading, error }) {
         </div>
       </div>
 
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        {result.heatmap_interpretation && (
+          <article className="rounded-[1.5rem] border border-cyan-300/20 bg-cyan-300/5 p-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">
+              Visual Attention Summary
+            </p>
+            <h3 className="mt-2 text-xl font-semibold text-white">
+              {result.heatmap_interpretation.title}
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {result.heatmap_interpretation.summary}
+            </p>
+            <div className="mt-4 rounded-xl bg-slate-950/50 p-3">
+              <p className="text-xs font-bold uppercase text-slate-500">Model Focus Note</p>
+              <p className="mt-1 text-sm text-slate-200">{result.heatmap_interpretation.clinical_note}</p>
+            </div>
+          </article>
+        )}
+      </div>
+
       {result.adaptive_strategy && result.adaptive_weights && (
         <article className="mt-5 rounded-[1.5rem] border border-emerald-300/15 bg-emerald-300/5 p-5">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-100/80">
@@ -242,19 +256,132 @@ export function ResultPanel({ result, loading, error }) {
         ))}
       </div>
 
+      {result.ood_analysis && (
+        <article
+          className={`mt-6 rounded-[2rem] border-2 p-6 ${
+            result.ood_analysis.is_ood
+              ? "border-rose-500/60 bg-rose-500/15"
+              : "border-emerald-500/60 bg-emerald-500/15"
+          }`}
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <div className={`h-4 w-4 rounded-full ${result.ood_analysis.is_ood ? 'bg-rose-500 animate-pulse shadow-lg shadow-rose-500' : 'bg-emerald-500 shadow-lg shadow-emerald-500'}`} />
+                <p
+                  className={`text-sm font-bold uppercase tracking-[0.3em] ${
+                    result.ood_analysis.is_ood ? "text-rose-300" : "text-emerald-300"
+                  }`}
+                >
+                  Reliability & OOD Assessment
+                </p>
+              </div>
+              
+              <h3 className="mt-4 text-4xl font-bold text-white leading-tight">
+                {result.ood_analysis.title}
+              </h3>
+              
+              <p className="mt-4 text-lg leading-relaxed text-slate-200">
+                {result.ood_analysis.summary}
+              </p>
+
+              {result.ood_analysis.reasons?.length > 0 && (
+                <div className="mt-5 space-y-3">
+                  <p className="text-xs font-bold uppercase text-slate-400 tracking-widest">Detection Insights</p>
+                  <ul className="space-y-2">
+                    {result.ood_analysis.reasons.map((reason, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm text-slate-300 italic">
+                        <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-slate-500" />
+                        {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className={`mt-8 rounded-2xl border-2 p-5 ${
+                result.ood_analysis.is_ood
+                  ? "bg-rose-500/20 border-rose-500/40"
+                  : "bg-emerald-500/20 border-emerald-500/40"
+              }`}>
+                <p className={`text-xs font-bold uppercase tracking-[0.2em] ${
+                  result.ood_analysis.is_ood ? "text-rose-300" : "text-emerald-300"
+                }`}>
+                  Clinical Recommendation
+                </p>
+                <p className="mt-3 text-base leading-7 text-slate-100 font-medium">
+                  {result.ood_analysis.recommendation}
+                </p>
+              </div>
+            </div>
+
+            {result.ood_analysis.metrics && (
+              <div className="grid w-full shrink-0 gap-4 sm:grid-cols-2 lg:w-80 lg:grid-cols-1">
+                <div className={`rounded-2xl border-2 p-5 shadow-lg ${
+                  result.ood_analysis.is_ood
+                    ? "border-rose-500/40 bg-slate-950/80"
+                    : "border-emerald-500/40 bg-slate-950/80"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      Confidence Margin
+                    </p>
+                    <span className="text-xs text-slate-400 font-medium">Threshold: 20%</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-bold text-white">
+                    {((result.ood_analysis.metrics.confidence_margin || 0) * 100).toFixed(1)}%
+                  </p>
+                  <div className="mt-3 h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                      className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500 transition-all duration-1000 shadow-lg shadow-cyan-500/50" 
+                      style={{ width: `${Math.min(100, (result.ood_analysis.metrics.confidence_margin || 0) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className={`rounded-2xl border-2 p-5 shadow-lg ${
+                  result.ood_analysis.is_ood
+                    ? "border-rose-500/40 bg-slate-950/80"
+                    : "border-emerald-500/40 bg-slate-950/80"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                      Norm. Entropy
+                    </p>
+                    <span className="text-xs text-slate-400 font-medium">Max: 1.0</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-bold text-white">
+                    {(result.ood_analysis.metrics.normalized_entropy || 0).toFixed(3)}
+                  </p>
+                  <div className="mt-3 h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-1000 shadow-lg shadow-emerald-500/50" 
+                      style={{ width: `${(result.ood_analysis.metrics.normalized_entropy || 0) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </article>
+      )}
+
       {result.validation && (
         <article className="mt-6 rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/5 p-5">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-100/80">
             Confidence Retention Validation
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-300">
-            These values show how much confidence is retained when the model is re-evaluated using
-            masked regions from different CAM layers and the final adaptive fused mask.
+            Think of this as a <strong>"Detective Stress Test."</strong> We show the AI only the highlighted
+            region and ask: "Can you still make the same diagnosis?" These percentages tell us how
+            much of the original "truth" was captured in each specific area.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {Object.entries(result.validation).map(([key, value]) => (
               <div key={key} className="rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-4">
-                <p className="text-sm uppercase tracking-[0.2em] text-slate-500">{key}</p>
+                <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+                  {prettyMetricLabel(key)}
+                </p>
                 <p className="mt-2 text-2xl font-semibold text-white">
                   {typeof value === "number" ? `${(value * 100).toFixed(2)}%` : value}
                 </p>
@@ -262,36 +389,10 @@ export function ResultPanel({ result, loading, error }) {
             ))}
           </div>
 
-          {validationEntries.length > 0 && (
-            <div className="mt-5 rounded-[1.25rem] border border-white/10 bg-slate-950/70 p-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
-                What These Metrics Mean
-              </p>
-              <p className="mt-3 text-sm leading-7 text-slate-200">
-                Each value shows how much of the model&apos;s original confidence remains after the
-                scan is masked using a specific heatmap region. Higher retention usually means that
-                the selected region preserved more of the evidence the model relied on for its
-                prediction.
-              </p>
-              <p className="mt-3 text-sm leading-7 text-slate-200">
-                In this result, the <span className="font-semibold text-white">{prettyMetricLabel(bestValidationEntry[0])}</span>{" "}
-                retains the highest confidence at{" "}
-                <span className="font-semibold text-white">
-                  {(bestValidationEntry[1] * 100).toFixed(2)}%
-                </span>
-                . That suggests this mask captures the most important predictive information among
-                the tested regions.
-              </p>
-              <p className="mt-3 text-sm leading-7 text-slate-200">
-                Very low values mean that the corresponding masked region, by itself, does not keep
-                much of the original prediction strength. In the adaptive approach, these layer-wise
-                retention values are also used to compute the fusion weights, so stronger layers
-                influence the final fused explanation more heavily.
-              </p>
-            </div>
-          )}
+        
         </article>
-      )}
-    </section>
-  )
-}
+        )}
+        </section>
+        )
+        }
+

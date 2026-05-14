@@ -33,7 +33,3 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 OUTPUT_FOLDER = os.path.join(BASE_DIR, "output")
 
 BASE_URL = "http://127.0.0.1:5000/"
-
-GEMINI_API_BASE_URL = os.environ.get("GEMINI_API_BASE_URL", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
