@@ -36,7 +36,17 @@ This project addresses the interpretability gap through a novel approach combini
 
 ### Standard Grad-CAM
 
-Gradient-weighted Class Activation Mapping (Grad-CAM) [3] is widely used for CNN interpretability. It computes class-discriminative localization maps by measuring gradient sensitivity: $\alpha_k^c = \frac{1}{Z} \sum_{i,j} \frac{\partial y_c}{\partial A_{ij}^k}$, then produces heatmaps as $L^c = \text{ReLU}(\sum_k \alpha_k^c A^k)$ [3]. The method has become a foundational approach in explainable AI for medical imaging [9].
+Gradient-weighted Class Activation Mapping (Grad-CAM) [3] is widely used for CNN interpretability. It computes class-discriminative localization maps by measuring gradient sensitivity.
+
+The Grad-CAM weight computation:
+
+$$\alpha_k^c = \frac{1}{Z} \sum_{i,j} \frac{\partial y_c}{\partial A_{ij}^k}$$
+
+Then produces heatmaps as:
+
+$$L^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
+
+The method has become a foundational approach in explainable AI for medical imaging [9].
 
 ### Fundamental Limitations
 
@@ -77,9 +87,9 @@ $$r_\ell = P(\text{predicted class} \mid \text{masked with } M_\ell)$$
 
 This answers: "Can the model still make the diagnosis using only this highlighted region?" [4]
 
-- High retention ($r_\ell \approx 0.9$): Layer captured diagnostic evidence
-- Medium retention ($r_\ell \approx 0.5$): Layer partially captured evidence
-- Low retention ($r_\ell \approx 0.2$): Layer highlighted non-diagnostic features
+- **High retention** ($r_\ell \approx 0.9$): Layer captured diagnostic evidence
+- **Medium retention** ($r_\ell \approx 0.5$): Layer partially captured evidence
+- **Low retention** ($r_\ell \approx 0.2$): Layer highlighted non-diagnostic features
 
 ### Adaptive Weight Computation
 
@@ -87,7 +97,7 @@ Normalize retention scores across layers:
 
 $$w_\ell = \frac{r_\ell}{\sum_{\ell'=2}^{4} r_{\ell'}}$$
 
-Weights automatically favor layers that retained diagnostic evidence [4], [20]. If layer 2 preserves 85% confidence while layer 4 preserves only 15%, layer 2 receives ~85% of the final heatmap's weight.
+Weights automatically favor layers that retained diagnostic evidence [4], [20]. For example, if layer 2 preserves 85% confidence while layer 4 preserves only 15%, layer 2 receives ~85% of the final heatmap's weight.
 
 ### Multi-Layer Fusion
 
