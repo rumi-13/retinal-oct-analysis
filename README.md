@@ -407,24 +407,12 @@ This project is for **research and educational purposes only**. It demonstrates 
 
 ---
 
-## Project Status & Citation
+## Project Status 
 
 **Status:** Ongoing Research (May 2026)  
 **Classification:** Technical Research Documentation  
 **Domain:** Medical Image Analysis, Explainable AI, Deep Learning
 
-If you use this research project, please cite:
-
-```bibtex
-@software{oct_adaptive_gradcam_2026,
-  title={Adaptive Multi-Layer Fused Grad-CAM for Retinal Disease Classification},
-  author={Retinal OCT Analysis Research Project},
-  year={2026},
-  month={May},
-  note={Technical Research Documentation - Ongoing Research},
-  url={https://github.com/...}
-}
-```
 
 For questions, suggestions, or to discuss collaboration opportunities, refer to the detailed technical documentation in the `/docs` folder, particularly:
 - [TECHNICAL_THESIS.md](docs/TECHNICAL_THESIS.md) for comprehensive methodology
