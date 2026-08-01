@@ -1,4 +1,4 @@
-# Adaptive Multi-Layer Fused Grad-CAM for Retinal Disease Classification
+# A Robust Pixel-Level Interpretability in OCT-based Retinal Disease Classification
 
 **A Technical Research Project on Explainable AI in Medical Imaging**
 
@@ -9,9 +9,9 @@
 
 Retinal disease classification via Optical Coherence Tomography (OCT) imaging is critical for early diagnosis and vision preservation [1]. While deep learning models achieve high diagnostic accuracy, their "black box" nature undermines clinical adoption [2]. Standard Grad-CAM [3] provides visual explanations but suffers from coarse spatial resolution and offers no verification that highlighted regions are diagnostically relevant.
 
-This project introduces **Adaptive Multi-Layer Fused Grad-CAM**, a novel explainability architecture that combines multi-resolution feature attribution with confidence-retention-based adaptive weighting [4]. Rather than relying on single-layer Grad-CAM or static fusion weights, the system dynamically computes per-scan fusion coefficients by measuring how much predictive evidence each convolutional layer's feature attribution retains when applied as a mask to the original image.
+This project introduces **Multi-Layer Fused Grad-CAM**, a multi-resolution fusion of Grad-CAM maps that produces robust pixel-level explanations. The method fuses heatmaps from several convolutional depths and uses confidence-based validation to verify that highlighted regions preserve predictive evidence when applied as masks to the original image.
 
-**Key results:** Sharper heatmaps with improved spatial precision, explicit verification that highlighted regions cause predictions, automatic adaptation to individual scan characteristics, and per-scan adaptive weight computation based on confidence retention validation.
+**Key results:** Sharper heatmaps with improved spatial precision, verification that highlighted regions preserve prediction evidence, and robustness quantified via SSIM under controlled heatmap perturbations.
 
 **Status:** This is an ongoing research project. The methodology, implementation, and empirical results may be subject to refinement and future improvements as the research progresses.
 
@@ -20,6 +20,7 @@ This project introduces **Adaptive Multi-Layer Fused Grad-CAM**, a novel explain
 
 
 ---
+![Sample Result](Output/fused-Cam.png)
 
 ## Introduction
 
@@ -49,10 +50,11 @@ $$L^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
 
 The method has become a foundational approach in explainable AI for medical imaging [9].
 
+![Standard Grad-CAM Result](Output/standard-gradCam.png)
 
 # A Robust Pixel-Level Interpretability in OCT-based Retinal Disease Classification
 
-Undergraduate research project implementing an adaptive multi-layer fusion of Grad-CAM maps (AMFG). This repository produces pixel-level, evidence-backed explanations for OCT-based retinal disease classification and evaluates robustness using SSIM under controlled heatmap perturbations.
+Undergraduate research project implementing a multi-layer fusion of Grad-CAM maps (AMFG). This repository produces pixel-level, evidence-backed explanations for OCT-based retinal disease classification and evaluates robustness using SSIM under controlled heatmap perturbations.
 
 **Authors**
 - Asgar Rashid — https://github.com/rumi-13
@@ -96,7 +98,7 @@ pip install -r requirements.txt
 
 Below are representative outputs produced by the pipeline. Full-size images are available in the `Output/` folder.
 
-- **Fused Grad-CAM (adaptive fusion):**
+-- **Fused Grad-CAM (multi-layer fusion):**
 
 ![Fused Grad-CAM](Output/fused-Cam.png)
 
@@ -177,7 +179,7 @@ npm run dev  # Runs on http://127.0.0.1:5173
 
 ### Core Methodology Validation
 
-To validate the adaptive fusion methodology [4], [20]:
+To validate the fused methodology [4], [20]:
 
 ```python
 from services.gradcam_service import compute_adaptive_fused_gradcam
@@ -187,14 +189,14 @@ from PIL import Image
 # Load OCT image
 image = Image.open("sample_oct.png")
 
-# Compute adaptive fused Grad-CAM [4]
-prediction, confidence_retention, adaptive_weights, fused_heatmap = compute_adaptive_fused_gradcam(image)
+# Compute fused Grad-CAM [4]
+prediction, confidence_retention, fusion_weights, fused_heatmap = compute_adaptive_fused_gradcam(image)
 
 print(f"Prediction: {prediction}")
 print(f"Layer 2 retention: {confidence_retention['layer_2']:.3f}")
 print(f"Layer 3 retention: {confidence_retention['layer_3']:.3f}")
 print(f"Layer 4 retention: {confidence_retention['layer_4']:.3f}")
-print(f"Adaptive weights: {adaptive_weights}")
+print(f"Fusion weights: {fusion_weights}")
 ```
 
 ### Backend API Testing (Optional)
@@ -205,7 +207,7 @@ To test the backend API endpoint:
 curl -X POST -F "image=@sample_oct.png" http://127.0.0.1:5000/predict
 ```
 
-Expected JSON response includes adaptive weights, retention scores, and dominant layer identification.
+Expected JSON response includes fusion weights, retention scores, and dominant layer identification.
 
 ---
 
@@ -231,7 +233,7 @@ Project_OCT/
 │
 ├── services/                       # CORE RESEARCH MODULES
 │   ├── model_service.py            # ResNet50 inference [23]
-│   ├── gradcam_service.py          # Multi-layer Grad-CAM & adaptive fusion [4], [20]
+│   ├── gradcam_service.py          # Multi-layer Grad-CAM & fusion [4], [20]
 │   ├── plot_service.py             # Heatmap visualization
 │   ├── ood_service.py              # Out-of-distribution detection [24]
 │   └── heatmap_interpretation_service.py
@@ -257,8 +259,8 @@ Project_OCT/
 
 ## Key Contributions
 
-✓ **Adaptive Multi-Layer Fused Grad-CAM [4]** — Novel confidence-retention validation approach  
-✓ **Per-Scan Adaptive Weighting [4], [20]** — Eliminates fixed empirical weights in multi-layer fusion  
+✓ **Multi-Layer Fused Grad-CAM [4]** — Novel confidence-based validation approach  
+✓ **Per-Scan Fusion Weighting (optional) [4], [20]** — Supports score-based fusion in multi-layer fusion  
 ✓ **Theoretical Framework [4]** — Mathematical foundation combining CNN layer analysis with confidence-based validation  
 ✓ **Clinical Interpretability [8], [18]** — Self-validating explanations with causal verification  
 ✓ **Comprehensive Empirical Analysis** — Multi-layer feature attribution comparison  
@@ -273,7 +275,7 @@ Project_OCT/
 4. **Theoretical Extensions:** Extend framework to other CNN architectures (DenseNet, Vision Transformers) [21], [27]
 5. **Extended Analysis:** Multi-scan volumetric OCT support and temporal change analysis [28]
 6. **Validation Studies:** Prospective clinical validation with ophthalmologists [29], [30]
-7. **Regularization Methods:** Investigate uncertainty quantification in adaptive weights [31]
+7. **Regularization Methods:** Investigate uncertainty quantification in fusion weights [31]
 
 ---
 
@@ -285,7 +287,7 @@ Project_OCT/
 
 [3] R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh, and B. A. Batra, "Grad-CAM: Visual explanations from deep networks via gradient-based localization," in Proc. IEEE Int. Conf. Comput. Vis. (ICCV), Oct. 2016, pp. 618–626.
 
-[4] (Internal) Adaptive Multi-Layer Fused Grad-CAM Research Project, "Confidence-retention based adaptive fusion for explainable medical image analysis," Technical Research Documentation, May 2026.
+[4] (Internal) Multi-Layer Fused Grad-CAM Research Project, "Confidence-based fusion for explainable medical image analysis," Technical Research Documentation, May 2026.
 
 [5] D. Huang, E. A. Swanson, C. P. Lin, J. S. Schuman, W. G. Stinson, W. Chang, M. R. Hee, T. Flotte, K. Gregory, C. A. Puliafito, and J. G. Fujimoto, "Optical coherence tomography," Science, vol. 254, no. 5035, pp. 1178–1181, Nov. 1991.
 
