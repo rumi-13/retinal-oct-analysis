@@ -2,8 +2,7 @@
 
 **A Technical Research Project on Explainable AI in Medical Imaging**
 
----
-##Collaborators
+## Collaborators
 1. *Asgar Rashid* (https://github.com/rumi-13)
 2. *Faisal Ahmad Malik* (https://github.com/faisalmalik01)
 ## Abstract
@@ -50,171 +49,114 @@ $$L^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
 
 The method has become a foundational approach in explainable AI for medical imaging [9].
 
-### Fundamental Limitations
 
-1. **Coarse Spatial Resolution:** Grad-CAM uses exclusively the final convolutional layer. In ResNet50, this is a 7×7 feature map requiring 32× bilinear interpolation to reach 224×224 resolution, producing blurry results that obscure precise pathological localization [3], [10].
+# A Robust Pixel-Level Interpretability in OCT-based Retinal Disease Classification
 
-2. **Loss of Fine Detail:** By discarding high-resolution early-layer representations, standard Grad-CAM misses geometric precision crucial for OCT diagnosis (sharp fluid boundaries, membrane structures, drusen deposits) [11].
+Undergraduate research project implementing an adaptive multi-layer fusion of Grad-CAM maps (AMFG). This repository produces pixel-level, evidence-backed explanations for OCT-based retinal disease classification and evaluates robustness using SSIM under controlled heatmap perturbations.
 
-3. **Noisy and Irrelevant Activation:** Heatmaps highlight regions statistically correlated with class labels but causally irrelevant to diagnosis—dataset artifacts, co-occurring structures, or non-diagnostic features that networks exploit [12].
+**Authors**
+- Asgar Rashid — https://github.com/rumi-13
+- Faisal Ahmad Malik — https://github.com/faisalmalik01
 
-4. **Instability:** Small imperceptible input changes produce substantially different heatmaps, even with unchanged predictions [13], undermining clinical confidence.
+**One-line summary**
+- Fuse Grad-CAM maps from multiple convolutional depths and weight them by how much predictive confidence they retain when applied as masks — producing anatomically focused, self-validated explanations.
 
-5. **Weak Verification:** Standard Grad-CAM provides no mechanism to verify that highlighted regions are actually responsible for predictions—heatmaps are post-hoc correlations without causal guarantees [8].
+**Key contributions**
+- Multi-layer Grad-CAM fusion using maps from early/mid/late convolutional stages to recover both spatial precision and semantic relevance.
+- Confidence-retention validation: re-run inference on binary-masked images to compute per-layer retention scores and normalize them into fusion weights.
+- Robustness evaluation: measure SSIM between original fused heatmaps and noisy perturbations (σ = 0.007, 0.008, 0.009) to quantify stability.
 
-### Theoretical Perspective: The Spatial-Semantic Trade-Off
+**High-level results**
+- The fused maps are sharper and more stable than single-layer Grad-CAM; across classes (CNV, DME, DRUSEN, NORMAL) the fused approach shows consistent SSIM improvements (~0.01–0.03 depending on noise level and class).
 
-CNNs exhibit an inverse relationship between spatial precision (layer 2: 28×28) and semantic content (layer 4: 7×7) [14], [15]. Single-layer explanations maximize one dimension at the expense of the other—suboptimal for medical imaging where both precision and semantics are critical [16].
+**Repository layout**
+- Docs/
+    - Dessertation.txt — dissertation chapter describing method and experiments
+    - Research-Dissertation.pdf — original PDF (binary)
+- notebooks/
+    - 01_Model_Training.ipynb — train or load the ResNet50 model used in experiments
+    - 02_Adaptive_Fused_GradCAM_Pipeline.ipynb — compute multi-layer Grad-CAM, fuse maps, perturb heatmaps, compute SSIM
+- oct_retinal_model.keras — pretrained model (where provided)
+- class_names.json — label mapping
+- requirements.txt — Python dependencies
+- Output/ — example outputs and galleries (empty by default)
 
----
+Getting started
+- Create a virtual environment and install dependencies:
 
-## Proposed Framework: Adaptive Multi-Layer Fused Grad-CAM
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate    # Windows
+pip install -r requirements.txt
 
-### Overview
+- Quick reproduction steps:
+    1. Place your OCT dataset where the notebooks expect it (update paths in the notebooks if necessary).
 
-The system addresses standard Grad-CAM limitations [3], [10] through:
+## Example Outputs
 
-1. **Multi-layer extraction** from layers 2 (28×28), 3 (14×14), and 4 (7×7) [14], [15]
-2. **Binary mask generation** from each layer's Grad-CAM [3]
-3. **Confidence-retention validation:** Apply each mask to the original image, re-run inference, measure confidence on the masked image [4]
-4. **Adaptive weight computation:** Normalize retention scores to generate per-scan fusion weights [4], [20]
-5. **Dynamic fusion:** Combine multi-layer heatmaps using adaptive weights
-6. **Final validation:** Verify the fused mask preserves diagnostic evidence [4]
+Below are representative outputs produced by the pipeline. Full-size images are available in the `Output/` folder.
 
-### Confidence-Retention Validation
+- **Fused Grad-CAM (adaptive fusion):**
 
-**Core Innovation [4]:** For each layer, generate a binary mask, apply it to the original image, and re-predict to measure confidence retention:
+![Fused Grad-CAM](Output/fused-Cam.png)
 
-$$r_\ell = P(\text{predicted class} \mid \text{masked with } M_\ell)$$
+- **Standard Grad-CAM (baseline):**
 
-This answers: "Can the model still make the diagnosis using only this highlighted region?" [4]
+![Standard Grad-CAM](Output/standard-gradCam.png)
 
-- **High retention** ($r_\ell \approx 0.9$): Layer captured diagnostic evidence
-- **Medium retention** ($r_\ell \approx 0.5$): Layer partially captured evidence
-- **Low retention** ($r_\ell \approx 0.2$): Layer highlighted non-diagnostic features
+- **Clean vs Noisy Fused Comparison:**
 
-### Adaptive Weight Computation
+![Clean vs Noisy Fused](Output/clean_vs_noisy-Fused-Cam.png)
 
-Normalize retention scores across layers:
+- **Noisy Fused Example:**
 
-$$w_\ell = \frac{r_\ell}{\sum_{\ell'=2}^{4} r_{\ell'}}$$
+![Noisy Fused](Output/noisy-fused-cam.png)
 
-Weights automatically favor layers that retained diagnostic evidence [4], [20]. For example, if layer 2 preserves 85% confidence while layer 4 preserves only 15%, layer 2 receives ~85% of the final heatmap's weight.
+- **SSIM Score Plot (robustness):**
 
-### Multi-Layer Fusion
+![SSIM Scores](Output/SSIM-Score.png)
 
-Final fused Grad-CAM [4]:
-
-$$\text{Fused CAM} = (w_2 \cdot \text{CAM}_2) + (w_3 \cdot \text{CAM}_3) + (w_4 \cdot \text{CAM}_4)$$
-
-**Result:** Spatially sharp explanations (preserving early-layer detail) [3], [10] that are semantically grounded (weighted by diagnostic relevance) [4], [20].
-
----
-
-## Results
-
-### Technical Achievements
-
-- **Spatial Precision:** Multi-resolution fusion [4], [17] produces sharper heatmaps with reduced interpolation artifacts
-- **Clinical Interpretability:** Adaptive weights explicitly reveal which spatial scales captured diagnostic evidence [18]
-- **Robustness:** Per-scan adaptation handles diverse pathologies (fine-grained drusen vs. distributed edema)
-- **Stability:** Confidence-retention validation provides causal grounding, not just statistical correlation [19]
-- **Evidence-Based Design:** Empirically validated per-scan weighting versus traditional fixed-weight approaches [4]
-
-### Practical Example
-
-For a CNV scan:
-- **Layer 2** (fine details): 85% confidence retention → highlights sharp membrane edge
-- **Layer 3** (mid-level): 40% confidence retention → highlights fluid region
-- **Layer 4** (semantics): 15% confidence retention → highlights overall macula
-
-**Adaptive weights:** Layer 2 receives 60%, Layer 3 receives 29%, Layer 4 receives 11%. Final explanation prioritizes the sharp membrane edge where the diagnostic evidence actually resides. This demonstrates the self-adaptive nature of the method, which requires no manual parameter tuning.
+If you want captions or smaller thumbnails instead, I can adjust layout and add figure captions referencing the dissertation sections.
 
 ---
 
-## Conclusions
+If you'd like any edits to tone, length, or more technical detail in the README, tell me which sections to expand or condense.
 
-This project demonstrates that **standard Grad-CAM is fundamentally inadequate for clinical medical imaging** [3], [10], failing to meet core requirements for precise localization and diagnostic verification [18].
 
-The proposed **Adaptive Multi-Layer Fused Grad-CAM** architecture provides [4]:
-- **Evidence-Based Explanations:** Confidence retention validation ensures highlighted regions are causally responsible for predictions
-- **Adaptive Optimization:** Per-scan weighting automatically adjusts to individual scan characteristics without manual tuning
-- **Theoretical Grounding:** Mathematical framework combining multi-resolution analysis with confidence-retention metrics [20]
-- **Scalable Framework:** Applicable to diverse medical imaging tasks beyond retinal OCT [21]
+### Optional: Running the Reference Implementation
+- Re-run the classifier on each masked image and record the predicted confidence r_l for the (original) predicted class.
+- Normalize r_l across layers to obtain fusion weights w_l = r_l / sum_l r_l.
+- Compute the fused heatmap: L_fused = sum_l w_l * L_l and optionally threshold/normalize for visualization.
 
-This research advances the state-of-the-art in medical AI interpretability, moving beyond post-hoc visualization [3] to self-validating explanations [4] that provide formal guarantees of diagnostic relevance. The work demonstrates that adaptive, evidence-based fusion is superior to traditional fixed-weight approaches for explaining CNN predictions in complex medical domains [16], [22].
+Robustness protocol
+- Perturb fused heatmaps with additive Gaussian noise at σ ∈ {0.007, 0.008, 0.009}.
+- Compute SSIM between original fused maps and their noisy variants to evaluate stability.
+
+Files you should inspect
+- [Docs/Dessertation.txt](Docs/Dessertation.txt)
+- [notebooks/01_Model_Training.ipynb](notebooks/01_Model_Training.ipynb)
+- [notebooks/02_Adaptive_Fused_GradCAM_Pipeline.ipynb](notebooks/02_Adaptive_Fused_GradCAM_Pipeline.ipynb)
+- [oct_retinal_model.keras](oct_retinal_model.keras)
+
+Recommended next steps (I can do these for you)
+- Add a small `scripts/reproduce_ssim.py` CLI to run the pipeline headless and print the SSIM table.
+- Generate an example gallery in `Output/` comparing standard vs fused Grad-CAM for a small sample of images.
+- Extract and add figure captions / example images to the README for quick demonstrations.
+
+Citation
+- If you use this work, please cite the accompanying dissertation (see [Docs/Dessertation.txt](Docs/Dessertation.txt)).
+
+Contact
+- Issues and questions: open an issue on the repository or contact the authors via their GitHub profiles above.
 
 ---
 
-## Technology Stack
-
-- **Backend:** Flask, TensorFlow/Keras, NumPy, Matplotlib
-- **Frontend:** React, Vite, Tailwind CSS
-- **Model:** ResNet50-based `.keras` architecture
-- **Supported Classes:** CNV, DME, Drusen, Normal
+If you'd like, I can now: (a) add the `scripts/reproduce_ssim.py` runner, (b) generate an `Output/` gallery from a small bundled sample, or (c) produce a one-page slide-friendly summary of the dissertation. Which would you prefer next?
 
 ---
 
-## Detailed Documentation
+If you'd like any edits to tone, length, or more technical detail in the README, tell me which sections to expand or condense.
 
-Complete technical analysis, mathematical formulations, and methodological details are available in the `/docs` folder:
-
-- **[SIMPLE_EXPLAINER.md](docs/SIMPLE_EXPLAINER.md)** — Intuitive explanation of the "Detective Test" metaphor
-- **[ADAPTIVE_FUSED_GRADCAM_DOC.md](docs/ADAPTIVE_FUSED_GRADCAM_DOC.md)** — Technical architecture and rationale
-- **[IN_DEPTH_ADAPTIVE_GRADCAM_EXPLAINER.md](docs/IN_DEPTH_ADAPTIVE_GRADCAM_EXPLAINER.md)** — Deep dive with real-world CNV scenario
-- **[TECHNICAL_THESIS.md](docs/TECHNICAL_THESIS.md)** — Full dissertation with mathematical foundations
-- **[TECHNICAL_THESIS.tex](docs/TECHNICAL_THESIS.tex)** — LaTeX source for formal publication
-
-## System Implementation
-
-The research methodology is implemented through a modular architecture combining deep learning inference with explainability computation. While a reference implementation includes both backend research components and a frontend interface for validation purposes, the core research focus is on the theoretical framework and backend algorithms.
-
-### Core Research Components
-
-**Backend Core [4]:**
-- ResNet50-based disease classification [23]
-- Multi-layer Grad-CAM extraction [3] from convolutional layers 2, 3, and 4  
-- Binary mask generation and confidence-retention validation [4]
-- Adaptive weight computation based on per-scan evidence [4]
-- Dynamic multi-layer fusion algorithm [20]
-
-**Key Modules:**
-- `model_service.py` — Model loading and ResNet50 inference
-- `gradcam_service.py` — Multi-layer Grad-CAM and adaptive fusion implementation [4], [20]
-- `plot_service.py` — Visualization generation for heatmaps and retention metrics
-
-The reference frontend (React, Vite) is provided for demonstration and validation of the research framework but is not the focus of this work. Refer to the `/docs` folder for full technical details on the research methodology.
-
-
-## Setup & Installation
-
-### Prerequisites
-
-- Python 3.8+
-- TensorFlow/Keras [23]
-- NumPy, Matplotlib, Pillow
-- (Optional) Node.js 16+ for reference frontend interface
-
-### Quick Start for Core Research
-
-1. **Prepare the model file:**
-   ```bash
-   cp docs/oct_retinal_model.keras ./
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Import and use the core modules [4]:**
-   ```python
-   from services.model_service import predict_image, model
-   from services.gradcam_service import compute_adaptive_fused_gradcam
-   
-   # Load and process OCT image
-   prediction, retention_scores, adaptive_weights = compute_adaptive_fused_gradcam(image_path)
-   ```
 
 ### Optional: Running the Reference Implementation
 
