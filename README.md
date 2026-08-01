@@ -5,6 +5,9 @@
 ## Collaborators
 1. *Asgar Rashid* (https://github.com/rumi-13)
 2. *Faisal Ahmad Malik* (https://github.com/faisalmalik01)
+
+## Supervisor
+1. Dr. Tawseef Ahmad teli (https://github.com/tay805)
 ## Abstract
 
 Retinal disease classification via Optical Coherence Tomography (OCT) imaging is critical for early diagnosis and vision preservation [1]. While deep learning models achieve high diagnostic accuracy, their "black box" nature undermines clinical adoption [2]. Standard Grad-CAM [3] provides visual explanations but suffers from coarse spatial resolution and offers no verification that highlighted regions are diagnostically relevant.
